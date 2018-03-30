@@ -3,6 +3,9 @@ __pycache__/
 *.py[cod]
 *$py.class
 
+# Mac Os
+.DS_Store
+
 # C extensions
 *.so
 
@@ -99,3 +102,6 @@ ENV/
 
 # mypy
 .mypy_cache/
+
+# Editors
+.tm_properties
