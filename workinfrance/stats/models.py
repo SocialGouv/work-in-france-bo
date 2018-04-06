@@ -9,18 +9,35 @@ from django.utils.translation import ugettext_lazy as _
 # pylint:disable=unsubscriptable-object
 
 
+class CompletedDossierAPTManager(models.Manager):
+
+    def get_queryset(self):
+        return super().get_queryset().filter(status__in=self.model.STATUSES_COMPLETED)
+
+
 class DossierAPT(models.Model):
 
+    # TPS status names are different between the model and the API.
     # https://github.com/betagouv/tps/blob/58ce66/app/models/dossier.rb#L2-L9
     # https://github.com/betagouv/tps/blob/58ce66/app/serializers/dossier_serializer.rb#L38-L53
+    STATUS_DRAFT = 'draft'
+    STATUS_INITIATED = 'initiated'  # en_construction
+    STATUS_RECEIVED = 'received'  # en_instruction
+    STATUS_CLOSED = 'closed'  # accepte
+    STATUS_REFUSED = 'refused'  # refuse
+    STATUS_WITHOUT_CONTINUATION = 'without_continuation'  # sans_suite
+
     STATUS_CHOICES = (
-        ('draft', _('Brouillon')),
-        ('initiated', _('En construction')),
-        ('received', _('En instruction')),
-        ('closed', _('Accepté')),
-        ('refused', _('Refusé')),
-        ('without_continuation', _('Sans suite')),
+        (STATUS_DRAFT, _('Brouillon')),
+        (STATUS_INITIATED, _('En construction')),
+        (STATUS_RECEIVED, _('En instruction')),
+        (STATUS_CLOSED, _('Accepté')),
+        (STATUS_REFUSED, _('Refusé')),
+        (STATUS_WITHOUT_CONTINUATION, _('Sans suite')),
     )
+
+    # https://github.com/betagouv/tps/blob/c7f5ca/app/models/dossier.rb#L12
+    STATUSES_COMPLETED = [STATUS_CLOSED, STATUS_REFUSED, STATUS_WITHOUT_CONTINUATION]
 
     ds_id = models.IntegerField(_("ID DS"), unique=True, db_index=True,
         help_text=_("ID sur demarches-simplifiees.fr"))
@@ -30,6 +47,9 @@ class DossierAPT(models.Model):
     department = models.CharField(_("Département"), max_length=255, db_index=True,
         help_text=_("Département qui figure sur le titre de séjour"))
     raw_json = JSONField(_("Résultat JSON brut"))
+
+    objects = models.Manager()
+    completed_objects = CompletedDossierAPTManager()
 
     def __str__(self):
         return str(self.ds_id)
