@@ -18,7 +18,7 @@ class DossierAPTAdmin(admin.ModelAdmin):
     )
     search_fields = ['ds_id']
     list_per_page = 100
-    # list_filter = ['status', 'department']
+    list_filter = ['status', 'department']
     ordering = ('-created_at',)
     list_display_links = ['id', 'ds_id']
     date_hierarchy = 'created_at'
