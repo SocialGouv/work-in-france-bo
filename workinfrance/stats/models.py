@@ -51,53 +51,70 @@ class DossierAPT(models.Model):
     objects = models.Manager()
     completed_objects = CompletedDossierAPTManager()
 
+    def __init__(self, *args, **kwargs):
+        """
+        Set some attributes that act as shortcuts for quick access to `raw_json` subfields.
+        """
+        super().__init__(*args, **kwargs)
+
+        RAW_JSON_MAPPING = [
+            'email',  # Email of the applicant.
+            'accompagnateurs',  # Array of all "accompagnateurs".
+            'entreprise',
+            'etablissement',
+            'pieces_justificatives'
+        ]
+        for property_name in RAW_JSON_MAPPING:
+            setattr(self, property_name, self.raw_json['dossier'][property_name])
+
+        RAW_JSON_CHAMPS_MAPPING = {
+            # Items in champs_private
+            'date_de_debut_apt': 'Date de début APT',
+            'date_de_fin_apt': 'Date de fin APT',
+            'cadre_reserve_a_ladministration': "Cadre réservé à l'administration",
+            # Items in champs
+            'delivre_par': 'Délivré par',
+            'salaire_brut': 'Salaire brut',
+            'nombre_dheures': "Nombre d'heures",
+            'date_de_fin': 'Date de fin',
+            'date_de_debut': 'Date de début',
+            'type_de_contrat': 'Type de contrat',
+            'adresse_ou_letudiant_va_travailler': "Adresse ou l'étudiant va travailler",
+            'emploi_occupe': 'Emploi occupé',
+            'telephone_de_lemployeur': "Téléphone de l'employeur",
+            'e_mail_de_lemployeur': "E-mail de l'employeur",
+            'prenom_de_lemployeur': "Prénom de l'employeur",
+            'nom_de_lemployeur': "Nom de l'employeur",
+            'departement_titre_de_sejour': 'Département qui figure sur le titre de séjour',
+            'numero': 'Numéro',
+            'reference_de_lancienne_autorisation_de_travail': 'Référence de l’ancienne autorisation de travail',
+            'demande': 'Demande',
+            'telephone': 'Téléphone',
+            'e_mail': 'E-mail',
+            'lieu_de_naissance': 'Lieu de naissance',
+            'date_de_naissance': 'Date de naissance',
+            'nationalite': 'Nationalité',
+            'prenom': 'Prénom',
+            'nom': 'Nom',
+            'civilite': 'Civilité',
+            'code_postal_de_residence_en_france': 'Code postal de résidence en France',
+            'commune_de_residence_en_france': 'Commune de résidence en France',
+            'a_propos_de_lemployeur': "À propos de l'employeur",
+            'informations_sur_le_contrat': 'Informations sur le contrat',
+            'employeur': 'Employeur',
+            'date_dexpiration_titre_sejour': 'Date d’expiration',
+            'salarie': 'Salarié',
+            'document_autorisant_le_sejour_en_france': 'Document autorisant le séjour en France',
+        }
+        for property_name, champ_name in RAW_JSON_CHAMPS_MAPPING.items():
+            setattr(self, property_name, self.get_value_of_champ(champ_name))
+
     def __str__(self):
         return str(self.ds_id)
 
-    # Below are some methods and properties that act as shortcuts for quick access to some `raw_json` info.
-
     def get_champs(self):
         """
-        Returns a dict of `champs` and `champs_private` from the `raw_json`, e.g.:
-        {
-            # ---------------------- Items in champs_private
-            'Date de début APT': '2018-04-03',
-            'Date de fin APT': '2018-05-20',
-            "Cadre réservé à l'administration": '',
-            # ---------------------- Items in champs
-            'Délivré par': 'Préfecture de Paris',
-            'Salaire brut': '28824 euros/an',
-            "Nombre d'heures": '1607 heures/an',
-            'Date de fin': '2018-08-03',
-            'Date de début': '2018-05-07',
-            'Type de contrat': 'contrat à durée déterminée (CDD)',
-            "Adresse ou l'étudiant va travailler": '16 rue de John Doe 75002',
-            'Emploi occupé': 'Compliance Officier',
-            "Téléphone de l'employeur": '0101010101',
-            "E-mail de l'employeur": 'john@doe.com',
-            "Prénom de l'employeur": 'John',
-            "Nom de l'employeur": 'Doe',
-            'Département qui figure sur le titre de séjour': '75 - Paris',
-            'Numéro': '1234567890',
-            'Référence de l’ancienne autorisation de travail': '',
-            'Demande': 'Première demande',
-            'Téléphone': '0601010101',
-            'E-mail': 'john@doe.com',
-            'Lieu de naissance': 'Tizi-Ouzou',
-            'Date de naissance': '1992-01-01',
-            'Nationalité': 'ALGERIE',
-            'Prénom': 'John',
-            'Nom': 'Doe',
-            'Civilité': 'M.',
-            'Code postal de résidence en France': '75015',
-            'Commune de résidence en France': 'Paris',
-            "À propos de l'employeur": None,
-            'Informations sur le contrat': None,
-            'Employeur': None,
-            'Date d’expiration': '2018-11-12',
-            'Salarié': None,
-            'Document autorisant le séjour en France': None,
-        }
+        Returns a dict of `champs` and `champs_private` from the `raw_json`.
         """
         champs = {
             item['type_de_champ']['libelle']: item['value']
@@ -112,57 +129,34 @@ class DossierAPT(models.Model):
 
     def get_value_of_champ(self, champ_name):
         """
-        Returns the value for the given TPS's 'libelle'.
+        Returns the value for the given TPS's `champ_name` ('libelle').
         Warning: sometimes typographic apostrophe can be used in a TPS's 'libelle'.
         """
-        return self.get_champs().get(champ_name)
+        value = self.get_champs().get(champ_name)
+        try:
+            # Convert the value to a date object.
+            value = datetime.strptime(value, '%Y-%m-%d').date()
+        except (TypeError, ValueError):
+            pass
+        return value
+
+    # Explicit properties are required for values to be displayed in the Django admin.
 
     @property
-    def email(self):
-        """
-        Return the email of the applicant.
-        """
-        return self.raw_json['dossier']['email']
+    def admin_departement_titre_de_sejour(self):
+        return self.departement_titre_de_sejour
 
     @property
-    def accompagnateurs(self):
-        """
-        Return an array of all "accompagnateurs".
-        """
-        return self.raw_json['dossier']['accompagnateurs']
+    def admin_date_de_debut_apt(self):
+        return self.date_de_debut_apt
 
     @property
-    def entreprise(self):
-        return self.raw_json['dossier']['entreprise']
+    def admin_date_de_fin_apt(self):
+        return self.date_de_fin_apt
 
     @property
-    def etablissement(self):
-        return self.raw_json['dossier']['etablissement']
-
-    @property
-    def pieces_justificatives(self):
-        return self.raw_json['dossier']['pieces_justificatives']
-
-    @property
-    def apt_start_date(self):
-        start_date = self.get_value_of_champ("Date de début APT")
-        if start_date:
-            start_date = datetime.strptime(start_date, '%Y-%m-%d')
-        return start_date
-
-    @property
-    def apt_end_date(self):
-        end_date = self.get_value_of_champ("Date de fin APT")
-        if end_date:
-            end_date = datetime.strptime(end_date, '%Y-%m-%d')
-        return end_date
-
-    @property
-    def expiration_titre_sejour_date(self):
-        expiration_date = self.get_value_of_champ("Date d’expiration")
-        if expiration_date:
-            expiration_date = datetime.strptime(expiration_date, '%Y-%m-%d')
-        return expiration_date
+    def admin_accompagnateurs(self):
+        return self.accompagnateurs
 
 
 # pylint:enable=unsubscriptable-object
@@ -178,24 +172,24 @@ def dossiers_to_watch_before_prefecture():
     dossiers_to_check = {}
     for d in dossiers:
 
-        if not d.expiration_titre_sejour_date or (d.expiration_titre_sejour_date < datetime.now()):
+        if not d.date_dexpiration_titre_sejour or (d.date_dexpiration_titre_sejour < datetime.now().date()):
             continue
 
-        dossiers_to_check[d.expiration_titre_sejour_date] = {
-            'expiration_titre_sejour_date': d.expiration_titre_sejour_date,
+        dossiers_to_check[d.date_dexpiration_titre_sejour] = {
+            'date_dexpiration_titre_sejour': d.date_dexpiration_titre_sejour,
             'ds_id': d.ds_id,
-            'nationality': d.get_value_of_champ('Nationalité'),
-            'first_name': d.get_value_of_champ('Prénom'),
-            'last_name': d.get_value_of_champ('Nom'),
+            'nationality': d.nationalite,
+            'first_name': d.prenom,
+            'last_name': d.nom,
             'status': d.get_status_display(),
         }
 
-    # Sort dict by the expiration_titre_sejour_date key.
+    # Sort dict by the date_dexpiration_titre_sejour key.
     dossiers_to_check = sorted(dossiers_to_check.items(), key=lambda x: x[0])
 
     for _, item in dossiers_to_check:
         print(
-            item['expiration_titre_sejour_date'].strftime("%d/%m/%Y"),
+            item['date_dexpiration_titre_sejour'].strftime("%d/%m/%Y"),
             item['ds_id'],
             item['nationality'],
             item['first_name'],

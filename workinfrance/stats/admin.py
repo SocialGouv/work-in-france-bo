@@ -11,14 +11,14 @@ class DossierAPTAdmin(admin.ModelAdmin):
         'ds_id',
         'status',
         'created',
-        'department',
-        'apt_start_date',
-        'apt_end_date',
-        'accompagnateurs',
+        'admin_departement_titre_de_sejour',
+        'admin_date_de_debut_apt',
+        'admin_date_de_fin_apt',
+        'admin_accompagnateurs',
     )
     search_fields = ['ds_id']
     list_per_page = 100
-    list_filter = ['status', 'department']
+    # list_filter = ['status', 'department']
     ordering = ('-created_at',)
     list_display_links = ['id', 'ds_id']
     date_hierarchy = 'created_at'
