@@ -4,6 +4,7 @@ from django.test import TestCase
 
 from workinfrance.stats.models import DossierAPT
 from workinfrance.stats.models import dossiers_to_watch_before_prefecture
+from workinfrance.stats.models import export_data_for_validity_check
 from workinfrance.stats.test.raw_json_fixture import RAW_JSON_ANONYMIZED
 
 
@@ -78,6 +79,11 @@ class DossierAPTTest(TestCase):
         expected_result = ['10/05/2018 - 44950 - FRANCE - John - Doe - Accepté']
         self.assertEqual(dossiers_to_watch, expected_result)
 
+    def test_export_data_for_validity_check(self):
+        export_data = export_data_for_validity_check()
+        expected_result = [{'id': 44950, 'siret': '52222222222222', 'prenom': '*o**', 'nom': '*o*'}]
+        self.assertEqual(export_data, expected_result)
+
 
 class DossierAPTStaticTest(TestCase):
     """
@@ -141,3 +147,8 @@ class DossierAPTStaticTest(TestCase):
         self.assertEqual(dt.second, 51)
         self.assertEqual(dt.microsecond, 491000)
         self.assertEqual(str(dt.tzinfo), 'UTC')
+
+    def test_obfuscate(self):
+        obfuscated_string = DossierAPT.obfuscate('Emma Louise')
+        expected_result = '*m** ******'
+        self.assertEqual(obfuscated_string, expected_result)

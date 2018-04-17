@@ -148,6 +148,17 @@ class DossierAPT(models.Model):
         return timezone.make_aware(dt, timezone.utc)
 
     @staticmethod
+    def obfuscate(string):
+        """Obfuscate a string by replacing all its characters except the second one."""
+        obfuscation_char = '*'
+        chars_to_ignore = [' ']
+        return ''.join(
+            char
+            if i == 2 or char in chars_to_ignore else obfuscation_char
+            for i, char in enumerate(string, start=1)
+        )
+
+    @staticmethod
     def reformat_json_champs(raw_json):
         """
         Extract `champs` and `champs_private` from the given `raw_json` and create
@@ -206,6 +217,23 @@ def dossiers_to_watch_before_prefecture():
         ) for dossier in dossiers
     ]
 
+
 def print_dossiers_to_watch_before_prefecture():
     for item in dossiers_to_watch_before_prefecture():
         print(item)
+
+
+def export_data_for_validity_check():
+    """
+    Return a list of closed 'Dossiers' (i.e. accepted) to be used in the validity check UI.
+    """
+    closed_dossiers = DossierAPT.objects.filter(status=DossierAPT.STATUS_CLOSED)
+    return [
+        {
+            'id': dossier.ds_id,
+            'siret': dossier.etablissement['siret'],
+            'prenom': DossierAPT.obfuscate(dossier.prenom),
+            'nom': DossierAPT.obfuscate(dossier.nom),
+        }
+        for dossier in closed_dossiers
+    ]
