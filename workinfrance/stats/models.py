@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.db.models.expressions import RawSQL, OrderBy
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -20,8 +21,8 @@ class DossierAPT(models.Model):
     """
     Store "dossiers" from demarches-simplifiees.fr fetched via `django-admin sync_stats`.
 
-    Look at `workinfrance.stats.test.raw_json_fixture` to see the structure of the data
-    stored in the `raw_json` field.
+    Look at `raw_json_fixture` to see the structure of the data stored in the `raw_json` field.
+    Look at `test_reformat_json_champs` to see the structure of the data stored in the `champs_json` field.
     """
 
     # TPS status names are different between the model and the API.
@@ -54,13 +55,62 @@ class DossierAPT(models.Model):
     department = models.CharField(_("Département"), max_length=255, db_index=True,
         help_text=_("Département qui figure sur le titre de séjour"))
     raw_json = JSONField(_("Résultat JSON brut"))
+    # The raw_json field structure make it difficult to query the values of its `champs`
+    # and `champs_private` subfields. The following field is used to facilitate queries.
+    champs_json = JSONField(_("Champs et champs privés"),
+        help_text=_("Champs et champs privés extraits de raw_json et reformatés"))
 
     objects = models.Manager()
     completed_objects = CompletedDossierAPTManager()
 
+    RAW_JSON_CHAMPS_MAPPING = {
+        # Items in champs_private
+        'date_de_debut_apt': 'Date de début APT',
+        'date_de_fin_apt': 'Date de fin APT',
+        'cadre_reserve_a_ladministration': "Cadre réservé à l'administration",
+        # Items in champs
+        'delivre_par': 'Délivré par',
+        'salaire_brut': 'Salaire brut',
+        'nombre_dheures': "Nombre d'heures",
+        'date_de_fin': 'Date de fin',
+        'date_de_debut': 'Date de début',
+        'type_de_contrat': 'Type de contrat',
+        'adresse_ou_letudiant_va_travailler': "Adresse ou l'étudiant va travailler",
+        'emploi_occupe': 'Emploi occupé',
+        'telephone_de_lemployeur': "Téléphone de l'employeur",
+        'e_mail_de_lemployeur': "E-mail de l'employeur",
+        'prenom_de_lemployeur': "Prénom de l'employeur",
+        'nom_de_lemployeur': "Nom de l'employeur",
+        'departement_titre_de_sejour': 'Département qui figure sur le titre de séjour',
+        'numero': 'Numéro',
+        'reference_de_lancienne_autorisation_de_travail': 'Référence de l’ancienne autorisation de travail',
+        'demande': 'Demande',
+        'telephone': 'Téléphone',
+        'e_mail': 'E-mail',
+        'lieu_de_naissance': 'Lieu de naissance',
+        'date_de_naissance': 'Date de naissance',
+        'nationalite': 'Nationalité',
+        'prenom': 'Prénom',
+        'nom': 'Nom',
+        'civilite': 'Civilité',
+        'code_postal_de_residence_en_france': 'Code postal de résidence en France',
+        'commune_de_residence_en_france': 'Commune de résidence en France',
+        'a_propos_de_lemployeur': "À propos de l'employeur",
+        'informations_sur_le_contrat': 'Informations sur le contrat',
+        'employeur': 'Employeur',
+        'date_dexpiration_titre_sejour': 'Date d’expiration',
+        'salarie': 'Salarié',
+        'document_autorisant_le_sejour_en_france': 'Document autorisant le séjour en France',
+    }
+
     def __init__(self, *args, **kwargs):
         """
-        Set some attributes that act as shortcuts for quick access to `raw_json` subfields.
+        Make some JSONField subfields of raw_json accessible as direct attributes of the instance, e.g.:
+            self.email
+            self.accompagnateurs
+            self.date_de_debut_apt
+            self.date_de_fin_apt
+            etc.
         """
         super().__init__(*args, **kwargs)
 
@@ -74,88 +124,44 @@ class DossierAPT(models.Model):
         for property_name in RAW_JSON_MAPPING:
             setattr(self, property_name, self.raw_json['dossier'][property_name])
 
-        RAW_JSON_CHAMPS_MAPPING = {
-            # Items in champs_private
-            'date_de_debut_apt': 'Date de début APT',
-            'date_de_fin_apt': 'Date de fin APT',
-            'cadre_reserve_a_ladministration': "Cadre réservé à l'administration",
-            # Items in champs
-            'delivre_par': 'Délivré par',
-            'salaire_brut': 'Salaire brut',
-            'nombre_dheures': "Nombre d'heures",
-            'date_de_fin': 'Date de fin',
-            'date_de_debut': 'Date de début',
-            'type_de_contrat': 'Type de contrat',
-            'adresse_ou_letudiant_va_travailler': "Adresse ou l'étudiant va travailler",
-            'emploi_occupe': 'Emploi occupé',
-            'telephone_de_lemployeur': "Téléphone de l'employeur",
-            'e_mail_de_lemployeur': "E-mail de l'employeur",
-            'prenom_de_lemployeur': "Prénom de l'employeur",
-            'nom_de_lemployeur': "Nom de l'employeur",
-            'departement_titre_de_sejour': 'Département qui figure sur le titre de séjour',
-            'numero': 'Numéro',
-            'reference_de_lancienne_autorisation_de_travail': 'Référence de l’ancienne autorisation de travail',
-            'demande': 'Demande',
-            'telephone': 'Téléphone',
-            'e_mail': 'E-mail',
-            'lieu_de_naissance': 'Lieu de naissance',
-            'date_de_naissance': 'Date de naissance',
-            'nationalite': 'Nationalité',
-            'prenom': 'Prénom',
-            'nom': 'Nom',
-            'civilite': 'Civilité',
-            'code_postal_de_residence_en_france': 'Code postal de résidence en France',
-            'commune_de_residence_en_france': 'Commune de résidence en France',
-            'a_propos_de_lemployeur': "À propos de l'employeur",
-            'informations_sur_le_contrat': 'Informations sur le contrat',
-            'employeur': 'Employeur',
-            'date_dexpiration_titre_sejour': 'Date d’expiration',
-            'salarie': 'Salarié',
-            'document_autorisant_le_sejour_en_france': 'Document autorisant le séjour en France',
-        }
-        for property_name, champ_name in RAW_JSON_CHAMPS_MAPPING.items():
-            setattr(self, property_name, self.get_value_of_champ(champ_name))
+        for key in self.RAW_JSON_CHAMPS_MAPPING:
+            try:
+                # Try to convert JSON dates to Python dates.
+                # This is useful e.g. when the attribute is used in Django admin.
+                value = self.json_date_to_python(self.champs_json[key])
+            except (TypeError, ValueError):
+                value = self.champs_json[key]
+            setattr(self, key, value)
 
     def __str__(self):
         return str(self.ds_id)
 
-    def get_champs(self):
-        """
-        Returns a dict of `champs` and `champs_private` from the `raw_json`.
-        """
-        champs = {
-            item['type_de_champ']['libelle']: item['value']
-            for item in self.raw_json['dossier']['champs']
-        }
-        champs_private = {
-            item['type_de_champ']['libelle']: item['value']
-            for item in self.raw_json['dossier']['champs_private']
-        }
-        champs.update(champs_private)
-        return champs
-
-    def get_value_of_champ(self, champ_name):
-        """
-        Returns the value for the given TPS's `champ_name` ('libelle').
-        Warning: sometimes typographic apostrophe can be used in a TPS's 'libelle'.
-        """
-        value = self.get_champs().get(champ_name)
-        try:
-            value = self.json_date_to_python(value)
-        except (TypeError, ValueError):
-            pass
-        return value
-
     @staticmethod
     def json_date_to_python(json_date):
-        """Convert `json_date` to a date object."""
+        """Convert the given `json_date` to a date object."""
         return datetime.strptime(json_date, '%Y-%m-%d').date()
 
     @staticmethod
     def json_datetime_to_python(json_datetime):
-        """Convert `json_datetime` to a datetime object."""
+        """Convert the given `json_datetime` to a datetime object."""
         dt = datetime.strptime(json_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
         return timezone.make_aware(dt, timezone.utc)
+
+    @staticmethod
+    def reformat_json_champs(raw_json):
+        """
+        Extract `champs` and `champs_private` from the given `raw_json` and create
+        a new dict where values are easily identified by a slugified key.
+        It's used to populate `self.champs_json`.
+        """
+        all_champs = {
+            item['type_de_champ']['libelle']: item
+            for item in raw_json['dossier']['champs'] + raw_json['dossier']['champs_private']
+        }
+        return {
+            property_name: all_champs[champ_name]['value']
+            for property_name, champ_name in DossierAPT.RAW_JSON_CHAMPS_MAPPING.items()
+        }
 
     # Explicit properties are required for values to be displayed in the Django admin.
 
@@ -181,35 +187,25 @@ class DossierAPT(models.Model):
 
 def dossiers_to_watch_before_prefecture():
     """
-    Print a list of 'Dossiers' to watch before a renew in 'préfecture'.
+    Return a list of 'Dossiers' to watch before a renew in 'préfecture'.
     Useful to verify whether a dossier was well inspected.
     """
-    dossiers = DossierAPT.objects.all()
+    dossiers = (
+        DossierAPT.objects
+        .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.today().strftime("%Y-%m-%d"))
+        .order_by(OrderBy(RawSQL("champs_json->>%s", ("date_dexpiration_titre_sejour",)), descending=True))
+    )
+    return [
+        "{0} - {1} - {2} - {3} - {4} - {5}".format(
+            dossier.date_dexpiration_titre_sejour.strftime("%d/%m/%Y"),
+            dossier.ds_id,
+            dossier.nationalite,
+            dossier.prenom,
+            dossier.nom,
+            dossier.get_status_display(),
+        ) for dossier in dossiers
+    ]
 
-    dossiers_to_check = {}
-    for d in dossiers:
-
-        if not d.date_dexpiration_titre_sejour or (d.date_dexpiration_titre_sejour < datetime.now().date()):
-            continue
-
-        dossiers_to_check[d.date_dexpiration_titre_sejour] = {
-            'date_dexpiration_titre_sejour': d.date_dexpiration_titre_sejour,
-            'ds_id': d.ds_id,
-            'nationality': d.nationalite,
-            'first_name': d.prenom,
-            'last_name': d.nom,
-            'status': d.get_status_display(),
-        }
-
-    # Sort dict by the date_dexpiration_titre_sejour key.
-    dossiers_to_check = sorted(dossiers_to_check.items(), key=lambda x: x[0])
-
-    for _, item in dossiers_to_check:
-        print(
-            item['date_dexpiration_titre_sejour'].strftime("%d/%m/%Y"),
-            item['ds_id'],
-            item['nationality'],
-            item['first_name'],
-            item['last_name'],
-            item['status'],
-        )
+def print_dossiers_to_watch_before_prefecture():
+    for item in dossiers_to_watch_before_prefecture():
+        print(item)

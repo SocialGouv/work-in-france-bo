@@ -96,6 +96,7 @@ Done.""")
                         'updated_at': data['updated_at'],
                         'department': data['department'],
                         'raw_json': data['raw_json'],
+                        'champs_json': data['champs_json'],
                     },
                 )
                 self.STATS['count_update_or_create'] += 1
@@ -122,4 +123,5 @@ Done.""")
             'updated_at': updated_at,
             'department': department,
             'raw_json': resp_json,
+            'champs_json': DossierAPT.reformat_json_champs(resp_json),
         }
