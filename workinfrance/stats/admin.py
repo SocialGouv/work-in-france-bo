@@ -1,5 +1,8 @@
 from django.contrib import admin
+from django.contrib.postgres.fields import JSONField
 from django.utils.translation import ugettext_lazy as _
+
+from prettyjson import PrettyJSONWidget
 
 from workinfrance.stats.models import DossierAPT
 
@@ -23,6 +26,10 @@ class DossierAPTAdmin(admin.ModelAdmin):
     list_display_links = ['id', 'ds_id']
     date_hierarchy = 'created_at'
 
+    formfield_overrides = {
+        JSONField: {'widget': PrettyJSONWidget}
+    }
+
     def created(self, obj):
         return obj.created_at.strftime("%d/%m/%Y %H:%M")
     created.short_description = _("Créé le")
@@ -40,6 +47,7 @@ class DossierAPTAdmin(admin.ModelAdmin):
         except AttributeError:
             return obj.apt_end_date
     apt_end_date.short_description = _("Fin APT")
+
 
 
 admin.site.register(DossierAPT, DossierAPTAdmin)
