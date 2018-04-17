@@ -1,4 +1,4 @@
-from datetime import datetime
+import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
@@ -139,12 +139,12 @@ class DossierAPT(models.Model):
     @staticmethod
     def json_date_to_python(json_date):
         """Convert the given `json_date` to a date object."""
-        return datetime.strptime(json_date, '%Y-%m-%d').date()
+        return datetime.datetime.strptime(json_date, '%Y-%m-%d').date()
 
     @staticmethod
     def json_datetime_to_python(json_datetime):
         """Convert the given `json_datetime` to a datetime object."""
-        dt = datetime.strptime(json_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
+        dt = datetime.datetime.strptime(json_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
         return timezone.make_aware(dt, timezone.utc)
 
     @staticmethod
@@ -203,7 +203,7 @@ def dossiers_to_watch_before_prefecture():
     """
     dossiers = (
         DossierAPT.objects
-        .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.today().strftime("%Y-%m-%d"))
+        .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.date.today().strftime("%Y-%m-%d"))
         .order_by(OrderBy(RawSQL("champs_json->>%s", ("date_dexpiration_titre_sejour",)), descending=True))
     )
     return [
