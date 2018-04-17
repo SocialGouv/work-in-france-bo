@@ -5,6 +5,7 @@ from django.core.management.base import BaseCommand
 
 import requests
 
+from workinfrance.stats import utils
 from workinfrance.stats.models import DossierAPT
 
 
@@ -105,11 +106,11 @@ Done.""")
         """
         Convert the raw JSON response to a format that we can store in the DossierAPT model.
         """
-        created_at = DossierAPT.json_datetime_to_python(resp_json['dossier']['created_at'])
+        created_at = utils.json_datetime_to_python(resp_json['dossier']['created_at'])
 
         updated_at = None
         if resp_json['dossier']['updated_at']:
-            updated_at = DossierAPT.json_datetime_to_python(resp_json['dossier']['updated_at'])
+            updated_at = utils.json_datetime_to_python(resp_json['dossier']['updated_at'])
 
         department = next(
             item['value'] for item in resp_json['dossier']['champs']

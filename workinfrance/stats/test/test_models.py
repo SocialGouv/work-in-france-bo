@@ -2,6 +2,7 @@ import datetime
 
 from django.test import TestCase
 
+from workinfrance.stats import utils
 from workinfrance.stats.models import DossierAPT
 from workinfrance.stats.models import dossiers_to_watch_before_prefecture
 from workinfrance.stats.models import export_data_for_validity_check
@@ -18,8 +19,8 @@ class DossierAPTTest(TestCase):
         self.dossier = DossierAPT.objects.create(
             ds_id=RAW_JSON_ANONYMIZED['dossier']['id'],
             status=RAW_JSON_ANONYMIZED['dossier']['state'],
-            created_at=DossierAPT.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['created_at']),
-            updated_at=DossierAPT.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['updated_at']),
+            created_at=utils.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['created_at']),
+            updated_at=utils.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['updated_at']),
             department='75 - Paris',
             raw_json=RAW_JSON_ANONYMIZED,
             champs_json=DossierAPT.reformat_json_champs(RAW_JSON_ANONYMIZED),
@@ -130,25 +131,3 @@ class DossierAPTStaticTest(TestCase):
             'document_autorisant_le_sejour_en_france': None
         }
         self.assertEqual(reformated_json, expected_result)
-
-    def test_json_date_to_python(self):
-        d = DossierAPT.json_date_to_python('2018-03-27')
-        self.assertEqual(d.year, 2018)
-        self.assertEqual(d.month, 3)
-        self.assertEqual(d.day, 27)
-
-    def test_json_datetime_to_python(self):
-        dt = DossierAPT.json_datetime_to_python('2018-03-27T08:49:51.491Z')
-        self.assertEqual(dt.year, 2018)
-        self.assertEqual(dt.month, 3)
-        self.assertEqual(dt.day, 27)
-        self.assertEqual(dt.hour, 8)
-        self.assertEqual(dt.minute, 49)
-        self.assertEqual(dt.second, 51)
-        self.assertEqual(dt.microsecond, 491000)
-        self.assertEqual(str(dt.tzinfo), 'UTC')
-
-    def test_obfuscate(self):
-        obfuscated_string = DossierAPT.obfuscate('Emma Louise')
-        expected_result = '*m** ******'
-        self.assertEqual(obfuscated_string, expected_result)

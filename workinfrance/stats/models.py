@@ -3,8 +3,9 @@ import datetime
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.db.models.expressions import RawSQL, OrderBy
-from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
+
+from workinfrance.stats import utils
 
 
 # JSONField is subscriptable.
@@ -128,35 +129,13 @@ class DossierAPT(models.Model):
             try:
                 # Try to convert JSON dates to Python dates.
                 # This is useful e.g. when the attribute is used in Django admin.
-                value = self.json_date_to_python(self.champs_json[key])
+                value = utils.json_date_to_python(self.champs_json[key])
             except (TypeError, ValueError):
                 value = self.champs_json[key]
             setattr(self, key, value)
 
     def __str__(self):
         return str(self.ds_id)
-
-    @staticmethod
-    def json_date_to_python(json_date):
-        """Convert the given `json_date` to a date object."""
-        return datetime.datetime.strptime(json_date, '%Y-%m-%d').date()
-
-    @staticmethod
-    def json_datetime_to_python(json_datetime):
-        """Convert the given `json_datetime` to a datetime object."""
-        dt = datetime.datetime.strptime(json_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
-        return timezone.make_aware(dt, timezone.utc)
-
-    @staticmethod
-    def obfuscate(string):
-        """Obfuscate a string by replacing all its characters except the second one."""
-        obfuscation_char = '*'
-        chars_to_ignore = [' ']
-        return ''.join(
-            char
-            if i == 2 or char in chars_to_ignore else obfuscation_char
-            for i, char in enumerate(string, start=1)
-        )
 
     @staticmethod
     def reformat_json_champs(raw_json):
@@ -232,8 +211,8 @@ def export_data_for_validity_check():
         {
             'id': dossier.ds_id,
             'siret': dossier.etablissement['siret'],
-            'prenom': DossierAPT.obfuscate(dossier.prenom),
-            'nom': DossierAPT.obfuscate(dossier.nom),
+            'prenom': utils.obfuscate(dossier.prenom),
+            'nom': utils.obfuscate(dossier.nom),
         }
         for dossier in closed_dossiers
     ]
