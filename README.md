@@ -4,7 +4,9 @@
 
 Ce dépôt de code contient le back office de Work in France.
 
-## Création de l'environnement Python isolé
+## Installation de l'environnement de développement
+
+### Création de l'environnement Python isolé
 
 Avec Python 3.6 et [`pipenv (>=11.8.3)`](https://github.com/pypa/pipenv) :
 
@@ -14,14 +16,14 @@ $ pipenv install
 $ pipenv install --dev
 ```
 
-## Création d'une base de donnée PostgreSQL (>= 9.5.12)
+### Création d'une base de donnée PostgreSQL (>= 9.5.12)
 
 ```shell
 $ psql -U postgres
 postgres=# create database work_in_france_bo;
 ```
 
-## Paramétrage du fichier `.env`
+### Paramétrage du fichier `.env`
 
 Pour utiliser la commande `django-admin`, le répertoire `work-in-france-bo` doit figurer dans votre `PYTHONPATH`.
 
@@ -42,7 +44,7 @@ Pour utiliser la commande `django-admin`, le répertoire `work-in-france-bo` doi
     DEMARCHES_SIMPLIFIEES_API_TOKEN='<SECRET>'
     DEMARCHES_SIMPLIFIEES_PROCEDURE_ID_APT='<SECRET>'
 
-## Initialisation du projet
+### Initialisation du projet
 
 ```shell
 $ pipenv run django-admin migrate
@@ -59,4 +61,16 @@ $ pipenv run django-admin sync_stats
 
 ```shell
 $ pipenv run django-admin runserver
+```
+
+## Lancement des tests unitaires
+
+```shell
+$ pipenv run django-admin test
+```
+
+## Vérification de la syntaxe du code
+
+```shell
+$ make pylint
 ```

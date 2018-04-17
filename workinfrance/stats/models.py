@@ -2,6 +2,7 @@ from datetime import datetime
 
 from django.contrib.postgres.fields import JSONField
 from django.db import models
+from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
 
@@ -16,6 +17,12 @@ class CompletedDossierAPTManager(models.Manager):
 
 
 class DossierAPT(models.Model):
+    """
+    Store "dossiers" from demarches-simplifiees.fr fetched via `django-admin sync_stats`.
+
+    Look at `workinfrance.stats.test.raw_json_fixture` to see the structure of the data
+    stored in the `raw_json` field.
+    """
 
     # TPS status names are different between the model and the API.
     # https://github.com/betagouv/tps/blob/58ce66/app/models/dossier.rb#L2-L9
@@ -134,11 +141,21 @@ class DossierAPT(models.Model):
         """
         value = self.get_champs().get(champ_name)
         try:
-            # Convert the value to a date object.
-            value = datetime.strptime(value, '%Y-%m-%d').date()
+            value = self.json_date_to_python(value)
         except (TypeError, ValueError):
             pass
         return value
+
+    @staticmethod
+    def json_date_to_python(json_date):
+        """Convert `json_date` to a date object."""
+        return datetime.strptime(json_date, '%Y-%m-%d').date()
+
+    @staticmethod
+    def json_datetime_to_python(json_datetime):
+        """Convert `json_datetime` to a datetime object."""
+        dt = datetime.strptime(json_datetime, "%Y-%m-%dT%H:%M:%S.%fZ")
+        return timezone.make_aware(dt, timezone.utc)
 
     # Explicit properties are required for values to be displayed in the Django admin.
 

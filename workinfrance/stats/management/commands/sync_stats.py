@@ -1,9 +1,7 @@
-from datetime import datetime
 import json
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
-from django.utils import timezone
 
 import requests
 
@@ -106,11 +104,11 @@ Done.""")
         """
         Convert the raw JSON response to a format that we can store in the DossierAPT model.
         """
-        created_at = datetime.strptime(resp_json['dossier']['created_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
+        created_at = DossierAPT.json_datetime_to_python(resp_json['dossier']['created_at'])
 
         updated_at = None
         if resp_json['dossier']['updated_at']:
-            updated_at = datetime.strptime(resp_json['dossier']['updated_at'], "%Y-%m-%dT%H:%M:%S.%fZ")
+            updated_at = DossierAPT.json_datetime_to_python(resp_json['dossier']['updated_at'])
 
         department = next(
             item['value'] for item in resp_json['dossier']['champs']
@@ -120,8 +118,8 @@ Done.""")
         return {
             'ds_id': resp_json['dossier']['id'],
             'status': resp_json['dossier']['state'],
-            'created_at': timezone.make_aware(created_at, timezone.utc),
-            'updated_at': timezone.make_aware(updated_at, timezone.utc) if updated_at else None,
+            'created_at': created_at,
+            'updated_at': updated_at,
             'department': department,
             'raw_json': resp_json,
         }
