@@ -111,6 +111,8 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
+MEDIA_ROOT = os.path.join(BASE_DIR, 'workinfrance/media/')
+
 # Settings for demarches-simplifiees.fr (DS)
 DS_PROCEDURE_ID_APT = os.environ.get('DEMARCHES_SIMPLIFIEES_PROCEDURE_ID_APT')
 DS_API_TOKEN = os.environ.get('DEMARCHES_SIMPLIFIEES_API_TOKEN')

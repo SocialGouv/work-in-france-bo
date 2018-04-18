@@ -57,6 +57,12 @@ $ pipenv run django-admin createsuperuser
 $ pipenv run django-admin sync_stats
 ```
 
+## Exporter le fichier JSON du *validity check*
+
+```shell
+pipenv run django-admin export_validity_check_data
+```
+
 ## Lancement du serveur de développement
 
 ```shell
