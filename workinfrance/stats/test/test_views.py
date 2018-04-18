@@ -1,3 +1,5 @@
+import datetime
+
 from django.test import TestCase
 
 from workinfrance.stats import utils
@@ -27,5 +29,15 @@ class ViewsTest(TestCase):
 
     def test_export_data_for_validity_check(self):
         export_data = views.export_data_for_validity_check()
-        expected_result = [{'id': 44950, 'siret': '52222222222222', 'prenom': '*o**', 'nom': '*o*'}]
+        expected_result = [
+            {
+                'ds_id': 44950,
+                'siret': '52222222222222',
+                'prenom': '*o**',
+                'nom': '*o*',
+                'date_de_debut_apt': datetime.date(2018, 3, 27),
+                'date_de_fin_apt': datetime.date(2018, 5, 10),
+                'has_expired': self.dossier.has_expired(),
+            },
+        ]
         self.assertEqual(export_data, expected_result)

@@ -40,10 +40,13 @@ def export_data_for_validity_check():
     closed_dossiers = DossierAPT.objects.filter(status=DossierAPT.STATUS_CLOSED)
     return [
         {
-            'id': dossier.ds_id,
+            'ds_id': dossier.ds_id,
             'siret': dossier.etablissement['siret'],
             'prenom': utils.obfuscate(dossier.prenom),
             'nom': utils.obfuscate(dossier.nom),
+            'has_expired': dossier.has_expired(),
+            'date_de_debut_apt': dossier.date_de_debut_apt,
+            'date_de_fin_apt': dossier.date_de_fin_apt,
         }
         for dossier in closed_dossiers
     ]

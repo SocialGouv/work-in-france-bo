@@ -73,6 +73,20 @@ class DossierAPTTest(TestCase):
         self.assertEqual(self.dossier.salarie, None)
         self.assertEqual(self.dossier.document_autorisant_le_sejour_en_france, None)
 
+    def test_has_expired(self):
+        today = datetime.date.today()
+        yesterday = today - datetime.timedelta(days=1)
+        tomorrow = today + datetime.timedelta(days=1)
+
+        self.dossier.date_de_fin_apt = yesterday
+        self.assertEqual(self.dossier.has_expired(), True)
+
+        self.dossier.date_de_fin_apt = today
+        self.assertEqual(self.dossier.has_expired(), False)
+
+        self.dossier.date_de_fin_apt = tomorrow
+        self.assertEqual(self.dossier.has_expired(), False)
+
 
 class DossierAPTStaticTest(TestCase):
     """

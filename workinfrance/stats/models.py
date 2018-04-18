@@ -1,3 +1,5 @@
+import datetime
+
 from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
@@ -148,6 +150,10 @@ class DossierAPT(models.Model):
             property_name: all_champs[champ_name]['value']
             for property_name, champ_name in DossierAPT.RAW_JSON_CHAMPS_MAPPING.items()
         }
+
+    def has_expired(self):
+        """Return True if an 'autorisation' has expired, False otherwise."""
+        return self.date_de_fin_apt and self.date_de_fin_apt < datetime.date.today()
 
     # Explicit properties are required for values to be displayed in the Django admin.
 
