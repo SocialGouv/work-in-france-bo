@@ -2,26 +2,26 @@ import datetime
 
 from django.test import TestCase
 
-from workinfrance.stats import utils
-from workinfrance.stats.models import DossierAPT
-from workinfrance.stats.test.raw_json_fixture import RAW_JSON_ANONYMIZED
+from workinfrance.dossiers import utils
+from workinfrance.dossiers.models import Dossier
+from workinfrance.dossiers.test.raw_json_fixture import RAW_JSON_ANONYMIZED
 
 
-class DossierAPTTest(TestCase):
+class DossierTest(TestCase):
     """
-    Tests on DossierAPT that require data to exist in DB.
+    Tests on Dossier that require data to exist in DB.
     """
 
     def setUp(self):
         super().setUp()
-        self.dossier = DossierAPT.objects.create(
+        self.dossier = Dossier.objects.create(
             ds_id=RAW_JSON_ANONYMIZED['dossier']['id'],
             status=RAW_JSON_ANONYMIZED['dossier']['state'],
             created_at=utils.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['created_at']),
             updated_at=utils.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['updated_at']),
             department='75 - Paris',
             raw_json=RAW_JSON_ANONYMIZED,
-            champs_json=DossierAPT.reformat_json_champs(RAW_JSON_ANONYMIZED),
+            champs_json=Dossier.reformat_json_champs(RAW_JSON_ANONYMIZED),
         )
 
     def test_attributes(self):
@@ -29,7 +29,7 @@ class DossierAPTTest(TestCase):
         Test instance attributes.
         """
         # Test "real" model fields.
-        self.assertEqual(self.dossier.status, DossierAPT.STATUS_CLOSED)
+        self.assertEqual(self.dossier.status, Dossier.STATUS_CLOSED)
 
         # Test attributes that are dynamically set to facilitate access to data stored in raw_json.
         self.assertEqual(self.dossier.email, 'john@doe.com')
@@ -88,13 +88,13 @@ class DossierAPTTest(TestCase):
         self.assertEqual(self.dossier.has_expired(), False)
 
 
-class DossierAPTStaticTest(TestCase):
+class DossierStaticTest(TestCase):
     """
-    Tests on DossierAPT that do not require data in DB.
+    Tests on Dossier that do not require data in DB.
     """
 
     def test_reformat_json_champs(self):
-        reformated_json = DossierAPT.reformat_json_champs(RAW_JSON_ANONYMIZED)
+        reformated_json = Dossier.reformat_json_champs(RAW_JSON_ANONYMIZED)
         expected_result = {
             'date_de_debut_apt': '2018-03-27',
             'date_de_fin_apt': '2018-05-10',

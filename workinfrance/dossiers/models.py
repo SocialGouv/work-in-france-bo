@@ -4,21 +4,21 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from workinfrance.stats import utils
+from workinfrance.dossiers import utils
 
 
 # JSONField is subscriptable.
 # pylint:disable=unsubscriptable-object
 
-class CompletedDossierAPTManager(models.Manager):
+class CompletedDossierManager(models.Manager):
 
     def get_queryset(self):
         return super().get_queryset().filter(status__in=self.model.STATUSES_COMPLETED)
 
 
-class DossierAPT(models.Model):
+class Dossier(models.Model):
     """
-    Store "dossiers" from demarches-simplifiees.fr fetched via `django-admin sync_stats`.
+    Store "dossiers" fetched from demarches-simplifiees.fr.
 
     Look at `raw_json_fixture` to see the structure of the data stored in the `raw_json` field.
     Look at `test_reformat_json_champs` to see the structure of the data stored in the `champs_json` field.
@@ -60,7 +60,7 @@ class DossierAPT(models.Model):
         help_text=_("Champs et champs privés extraits de raw_json et reformatés"))
 
     objects = models.Manager()
-    completed_objects = CompletedDossierAPTManager()
+    completed_objects = CompletedDossierManager()
 
     RAW_JSON_CHAMPS_MAPPING = {
         # Items in champs_private
@@ -148,7 +148,7 @@ class DossierAPT(models.Model):
         }
         return {
             property_name: all_champs[champ_name]['value']
-            for property_name, champ_name in DossierAPT.RAW_JSON_CHAMPS_MAPPING.items()
+            for property_name, champ_name in Dossier.RAW_JSON_CHAMPS_MAPPING.items()
         }
 
     def has_expired(self):

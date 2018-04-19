@@ -5,7 +5,7 @@ from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.core.serializers.json import DjangoJSONEncoder
 
-from workinfrance.stats.views import export_data_for_validity_check
+from workinfrance.dossiers.views import export_data_for_validity_check
 
 
 class Command(BaseCommand):

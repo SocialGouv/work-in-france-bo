@@ -13,7 +13,7 @@ class Migration(migrations.Migration):
 
     operations = [
         migrations.CreateModel(
-            name='DossierAPT',
+            name='Dossier',
             fields=[
                 ('id', models.AutoField(auto_created=True, primary_key=True, serialize=False, verbose_name='ID')),
                 ('ds_id', models.IntegerField(db_index=True, help_text='ID sur demarches-simplifiees.fr', unique=True, verbose_name='ID DS')),

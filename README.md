@@ -54,7 +54,7 @@ $ pipenv run django-admin createsuperuser
 ## Récupération des dossiers depuis demarches-simplifiees.fr
 
 ```shell
-$ pipenv run django-admin sync_stats
+$ pipenv run django-admin sync_dossiers
 ```
 
 ## Exporter le fichier JSON du *validity check*

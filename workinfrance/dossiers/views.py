@@ -2,8 +2,8 @@ import datetime
 
 from django.db.models.expressions import RawSQL, OrderBy
 
-from workinfrance.stats import utils
-from workinfrance.stats.models import DossierAPT
+from workinfrance.dossiers import utils
+from workinfrance.dossiers.models import Dossier
 
 
 def dossiers_to_watch_before_prefecture():
@@ -12,7 +12,7 @@ def dossiers_to_watch_before_prefecture():
     Useful to verify whether a dossier was well inspected.
     """
     dossiers = (
-        DossierAPT.objects
+        Dossier.objects
         .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.date.today().strftime("%Y-%m-%d"))
         .order_by(OrderBy(RawSQL("champs_json->>%s", ("date_dexpiration_titre_sejour",)), descending=True))
     )
@@ -37,7 +37,7 @@ def export_data_for_validity_check():
     """
     Return a list of closed 'Dossiers' (i.e. accepted) to be used in the validity check UI.
     """
-    closed_dossiers = DossierAPT.objects.filter(status=DossierAPT.STATUS_CLOSED)
+    closed_dossiers = Dossier.objects.filter(status=Dossier.STATUS_CLOSED)
     return [
         {
             'ds_id': dossier.ds_id,

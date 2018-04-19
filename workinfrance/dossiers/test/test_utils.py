@@ -1,6 +1,6 @@
 from django.test import TestCase
 
-from workinfrance.stats import utils
+from workinfrance.dossiers import utils
 
 
 class UtilsTest(TestCase):

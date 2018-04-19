@@ -4,10 +4,10 @@ from django.utils.translation import ugettext_lazy as _
 
 from prettyjson import PrettyJSONWidget
 
-from workinfrance.stats.models import DossierAPT
+from workinfrance.dossiers.models import Dossier
 
 
-class DossierAPTAdmin(admin.ModelAdmin):
+class DossierAdmin(admin.ModelAdmin):
 
     list_display = (
         'id',
@@ -50,4 +50,4 @@ class DossierAPTAdmin(admin.ModelAdmin):
 
 
 
-admin.site.register(DossierAPT, DossierAPTAdmin)
+admin.site.register(Dossier, DossierAdmin)

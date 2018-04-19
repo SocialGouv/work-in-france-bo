@@ -5,8 +5,8 @@ from django.core.management.base import BaseCommand
 
 import requests
 
-from workinfrance.stats import utils
-from workinfrance.stats.models import DossierAPT
+from workinfrance.dossiers import utils
+from workinfrance.dossiers.models import Dossier
 
 
 class Command(BaseCommand):
@@ -73,7 +73,7 @@ Done.""")
 
             self.stdout.write('-' * 80)
 
-            if DossierAPT.completed_objects.filter(ds_id=dossier_id).exists():
+            if Dossier.completed_objects.filter(ds_id=dossier_id).exists():
                 # Don't process a dossier that is already completed.
                 self.stdout.write(f'Dossier {dossier_id} already in a completed state')
                 continue
@@ -85,11 +85,11 @@ Done.""")
             self.STATS['count_http_queries'] += 1
 
             data = self.format_for_model(resp_json)
-            dossier = DossierAPT.objects.filter(ds_id=data['ds_id']).first()
+            dossier = Dossier.objects.filter(ds_id=data['ds_id']).first()
 
             if not dossier or data['updated_at'] > dossier.updated_at:
                 self.stdout.write(f'Storing dossier {dossier_id}')
-                DossierAPT.objects.update_or_create(
+                Dossier.objects.update_or_create(
                     ds_id=data['ds_id'],
                     defaults={
                         'status': data['status'],
@@ -104,7 +104,7 @@ Done.""")
 
     def format_for_model(self, resp_json):
         """
-        Convert the raw JSON response to a format that we can store in the DossierAPT model.
+        Convert the raw JSON response to a format that we can store in the Dossier model.
         """
         created_at = utils.json_datetime_to_python(resp_json['dossier']['created_at'])
 
@@ -124,5 +124,5 @@ Done.""")
             'updated_at': updated_at,
             'department': department,
             'raw_json': resp_json,
-            'champs_json': DossierAPT.reformat_json_champs(resp_json),
+            'champs_json': Dossier.reformat_json_champs(resp_json),
         }

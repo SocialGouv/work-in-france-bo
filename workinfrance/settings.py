@@ -23,7 +23,7 @@ THIRD_PARTY_APPS = [
 ]
 
 WORKINFRANCE_APPS = [
-    'workinfrance.stats',
+    'workinfrance.dossiers',
 ]
 
 INSTALLED_APPS = DJANGO_APPS + THIRD_PARTY_APPS + WORKINFRANCE_APPS
