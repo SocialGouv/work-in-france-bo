@@ -35,6 +35,7 @@ class ViewsTest(TestCase):
                 'siret': '52222222222222',
                 'prenom': '*o**',
                 'nom': '*o*',
+                'date_de_naissance': datetime.date(1978, 12, 20),
                 'date_de_debut_apt': datetime.date(2018, 3, 27),
                 'date_de_fin_apt': datetime.date(2018, 5, 10),
                 'has_expired': self.dossier.has_expired(),
