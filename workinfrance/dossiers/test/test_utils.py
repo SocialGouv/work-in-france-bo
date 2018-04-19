@@ -23,6 +23,6 @@ class UtilsTest(TestCase):
         self.assertEqual(str(dt.tzinfo), 'UTC')
 
     def test_obfuscate(self):
-        obfuscated_string = utils.obfuscate('Emma Louise')
+        obfuscated_string = utils.obfuscate(' Emma Louise    ')
         expected_result = '*m** ******'
         self.assertEqual(obfuscated_string, expected_result)

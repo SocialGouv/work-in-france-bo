@@ -21,5 +21,5 @@ def obfuscate(string):
     return ''.join(
         char
         if i == 2 or char in chars_to_ignore else obfuscation_char
-        for i, char in enumerate(string, start=1)
+        for i, char in enumerate(string.strip(), start=1)
     )
