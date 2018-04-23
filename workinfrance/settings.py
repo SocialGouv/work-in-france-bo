@@ -5,9 +5,14 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 SECRET_KEY = os.environ.get('WIF_SECRET_KEY')
 
-DEBUG = os.environ.get('WIF_DEBUG')
+DEBUG = os.environ.get('WIF_DEBUG') == 'True'
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = [
+    '0.0.0.0',
+    '127.0.0.1',
+    'localhost',
+    'wif-bo.num.social.gouv.fr',
+]
 
 DJANGO_APPS = [
     'django.contrib.admin',
@@ -110,6 +115,8 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+STATIC_ROOT = os.path.join(BASE_DIR, 'workinfrance/static/')
 
 MEDIA_ROOT = os.path.join(BASE_DIR, 'workinfrance/media/')
 

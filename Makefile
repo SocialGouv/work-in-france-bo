@@ -4,7 +4,7 @@
 # ============
 
 clean:
-	find . -type d -name "__pycache__" -depth -exec rm -rf '{}' \;
+	docker exec -t wif_django find . -type d -name "__pycache__" -depth -exec rm -rf '{}' \;
 
 pylint:
-	pipenv run pylint --rcfile='.pylintrc' --reports=no --output-format=colorized 'workinfrance';
+	docker exec -t wif_django pylint --rcfile='.pylintrc' --reports=no --output-format=colorized 'workinfrance';
