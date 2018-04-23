@@ -7,8 +7,10 @@ ENV PYTHONIOENCODING="UTF-8"
 RUN addgroup -S app \
     && adduser -G app -h $APP_DIR -D app
 
+# mailcap contains /etc/mime.types.
 RUN apk update \
     && apk add --no-cache \
+       mailcap \
        gcc \
        gettext \
        jpeg \
