@@ -100,9 +100,9 @@ Paramétrage du CRON pour mettre à jour et fournir `validity_check.json` au bac
 # Ajouter un CRON en root.
 $ sudo crontab -e
 
-# https://crontab.guru/#0_*_8-18_*_1-5
-# At minute 0 on every day-of-month from 8 through 18 and on every day-of-week from Monday through Friday.
-0 * 8-18 * 1-5 /usr/bin/docker exec -t wif_django python manage.py sync_dossiers && /usr/bin/docker exec -t wif_django python manage.py export_validity_check_data && cp /home/mitech/work-in-france-bo/workinfrance/media/validity_check.json /home/mitech/work-in-france-bo-public/validity_check.json && chown mitech:mitech /home/mitech/work-in-france-bo-public/validity_check.json && chmod 664 /home/mitech/work-in-france-bo-public/validity_check.json
+# https://crontab.guru/#0_*_9-19_*_1-5
+# At minute 0 on every day-of-month from 9 through 19 and on every day-of-week from Monday through Friday.
+0 * 9-19 * 1-5 /usr/bin/docker exec -t wif_django python manage.py sync_dossiers && /usr/bin/docker exec -t wif_django python manage.py export_validity_check_data && cp /home/mitech/work-in-france-bo/workinfrance/media/validity_check.json /home/mitech/work-in-france-bo-public/validity_check.json && chown mitech:mitech /home/mitech/work-in-france-bo-public/validity_check.json && chmod 664 /home/mitech/work-in-france-bo-public/validity_check.json
 
 # Voir les CRON.
 $ sudo crontab -l
