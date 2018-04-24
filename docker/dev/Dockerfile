@@ -12,22 +12,17 @@ RUN addgroup -S app \
 # mailcap contains /etc/mime.types.
 RUN apk update \
     && apk add --no-cache \
-       mailcap \
-       gcc \
-       gettext \
-       jpeg \
-       jpeg-dev \
-       libc-dev \
-       libxml2-dev \
-       libxslt-dev \
-       linux-headers \
-       make \
-       musl-dev \
-       pcre-dev \
-       postgresql \
-       postgresql-dev \
-       tzdata \
-       zlib-dev
+      gcc \
+      gettext \
+      libc-dev \
+      linux-headers \
+      mailcap \
+      make \
+      musl-dev \
+      pcre-dev \
+      postgresql \
+      postgresql-dev \
+      tzdata
 
 RUN cp /usr/share/zoneinfo/Europe/Paris /etc/localtime \
    && echo "Europe/Paris" > /etc/timezone

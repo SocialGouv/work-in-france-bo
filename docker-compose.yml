@@ -3,38 +3,31 @@ version: '3'
 services:
 
   db:
-    environment:
-      POSTGRES_USER: ${POSTGRES_USER}
-      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
-      POSTGRES_WIF_DATABASE_NAME: ${WIF_DATABASE_NAME}
-      POSTGRES_WIF_DATABASE_USER: ${WIF_DATABASE_USER}
-      POSTGRES_WIF_DATABASE_PASSWORD: ${WIF_DATABASE_PASSWORD}
-    restart: always
+    env_file:
+      - .env
     image: postgres:9.6-alpine
+    container_name: wif_postgres
     volumes:
       - wif_pgdata:/var/lib/postgresql
       - ./docker/common/psql_init.sh:/docker-entrypoint-initdb.d/postgres-init.sh
+    restart: always
     ports:
       - "5433:5432"
-    container_name: wif_postgres
 
   web:
     env_file:
       - .env
+    depends_on:
+      - db
+    container_name: wif_django
     build:
       context: .
       dockerfile: ./docker/dev/Dockerfile
-    environment:
-      POSTGRES_HOST: db
-      POSTGRES_PORT: 5432
     volumes:
       - .:/app
-    depends_on:
-      - db
+    restart: always
     ports:
       - "8000:8000"
-    container_name: wif_django
-    restart: always
 
 volumes:
   wif_pgdata:
