@@ -63,10 +63,13 @@ $ make pylint
 ## Mémo (en environnement de développement)
 
 ```shell
-# Pour ouvrir un shell dans l'instance Docker
+# Ouvrir un shell dans l'instance Docker.
 $ docker exec -ti wif_django /bin/sh
 
-# Se connecter au PostgreSQL de l'instance Docker
+# Ouvrir un shell Django dans l'instance Docker.
+$ docker exec -ti wif_django python manage.py shell
+
+# Se connecter au PostgreSQL de l'instance Docker.
 $ psql -U postgres --host=0.0.0.0 --port=5433
 ```
 
