@@ -7,10 +7,10 @@ from workinfrance.dossiers.models import Dossier
 
 
 def dossiers_to_watch_before_prefecture():
-    '''
+    """
     Return a list of 'Dossiers' to watch before a renew in 'préfecture'.
     Useful to verify whether a dossier was well inspected.
-    '''
+    """
     dossiers = (
         Dossier.objects
         .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.date.today().strftime('%Y-%m-%d'))
@@ -34,9 +34,9 @@ def print_dossiers_to_watch_before_prefecture():
 
 
 def export_data_for_validity_check():
-    '''
+    """
     Return a list of closed 'Dossiers' (i.e. accepted) to be used in the validity check UI.
-    '''
+    """
     closed_dossiers = Dossier.objects.filter(status=Dossier.STATUS_CLOSED)
     return [
         {

@@ -23,3 +23,9 @@ def obfuscate(string):
         if i == 2 or char in chars_to_ignore else obfuscation_char
         for i, char in enumerate(string.strip(), start=1)
     )
+
+def daterange(from_datetime, to_datetime):
+    """Return all day-dates between two dates as datetime.date objects."""
+    delta = to_datetime - from_datetime
+    for i in range(delta.days + 1):
+        yield (from_datetime + datetime.timedelta(days=i)).date()
