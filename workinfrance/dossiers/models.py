@@ -5,15 +5,11 @@ from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
 from workinfrance.dossiers import utils
+from workinfrance.dossiers import models_managers
 
 
 # JSONField is subscriptable.
 # pylint:disable=unsubscriptable-object
-
-class CompletedDossierManager(models.Manager):
-
-    def get_queryset(self):
-        return super().get_queryset().filter(status__in=self.model.STATUSES_COMPLETED)
 
 
 class Dossier(models.Model):
@@ -60,7 +56,8 @@ class Dossier(models.Model):
         help_text=_("Champs et champs privés extraits de raw_json et reformatés"))
 
     objects = models.Manager()
-    completed_objects = CompletedDossierManager()
+    completed_objects = models_managers.CompletedManager()
+    stats_objects = models_managers.StatsQueries.as_manager()
 
     RAW_JSON_CHAMPS_MAPPING = {
         # Items in champs_private
