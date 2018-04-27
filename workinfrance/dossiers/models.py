@@ -4,8 +4,9 @@ from django.contrib.postgres.fields import JSONField
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
 
-from workinfrance.dossiers import utils
 from workinfrance.dossiers import models_managers
+from workinfrance.dossiers import models_queries
+from workinfrance.dossiers import utils
 
 
 # JSONField is subscriptable.
@@ -57,7 +58,7 @@ class Dossier(models.Model):
 
     objects = models.Manager()
     completed_objects = models_managers.CompletedManager()
-    stats_objects = models_managers.StatsQueries.as_manager()
+    stats_objects = models_queries.StatsQueries.as_manager()
 
     RAW_JSON_CHAMPS_MAPPING = {
         # Items in champs_private
