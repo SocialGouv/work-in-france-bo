@@ -73,29 +73,28 @@ $ docker exec -ti wif_django python manage.py shell
 $ psql -U postgres --host=0.0.0.0 --port=5433
 ```
 
-## Mécanisme du *validity check*
+## Export et partage de fichiers JSON entre les back-offices
 
-Le *validity check* est un mécanisme permettant de vérifier l'authenticité d'une attestation délivrée par Work in France.
-
-Ce mécanisme est composé :
-
-- d'une interface publique sur un site web ([`work-in-france`](https://github.com/SocialGouv/work-in-france)) qui interroge une API du back-office public
-- d'un back-office public ([`work-in-france-bo-public`](https://github.com/SocialGouv/work-in-france-bo-public)) comprenant une API qui expose des données anonymisées fournies par un back-office privé
-- d'un back-office privé (ce dépôt de code) qui récupère et traite les données depuis l'API de demarches-simplifiees.fr
-
-Le back-office privé génère un fichier `validity_check.json` via la commande django-admin `export_validity_check_data`. Ce fichier est ensuite passé au back-office public.
-
-Cette tâche est automatisée via un CRON sur la machine de production.
-
-Rappel : les deux back-offices sont lancés avec `docker` et `docker-compose` et **un volume** est utilisé pour pouvoir mettre à jour le fichier `validity_check.json` :
+Les deux back-offices sont lancés avec `docker` et `docker-compose` et **des volumes** sont utilisés pour pouvoir mettre à jour des fichiers JSON :
 
 ```shell
 # Lancement du back-office privé.
 $ cd work-in-france-bo && sudo docker-compose up -d
 
 # Lancement du back-office public.
-$ sudo docker run --restart=always -d -p 1337:1337 -v $PWD/validity_check.json:/app/src/server/apt/validity_check.json wif-bo-public
+$ sudo docker run --restart=always -d -p 1337:1337 -v $PWD/validity_check.json:/app/src/server/apt/validity_check.json -v $PWD/stats.json:/app/src/server/public/stats.json wif-bo-public
 ```
+
+### Partage du fichier JSON du *validity check*
+
+Le *validity check* est un mécanisme permettant de vérifier l'authenticité d'une attestation délivrée par Work in France.
+
+Fonctionnement du mécanisme :
+
+- une page du site web ([`work-in-france`](https://github.com/SocialGouv/work-in-france)) interroge une API du back-office public
+- l'API du back-office public ([`work-in-france-bo-public`](https://github.com/SocialGouv/work-in-france-bo-public)) parse un fichier JSON contenant des données anonymisées
+- ce ficher JSON est généré par le back-office privé (ce dépôt de code) via la commande django-admin `export_validity_check_data`
+- une tâche CRON déclenche la génération de ce fichier JSON et en fait une copie dans un dossier monté en tant que volume dans l'instance Docker du back-office public
 
 Paramétrage du CRON pour mettre à jour et fournir `validity_check.json` au back-office public :
 
@@ -112,4 +111,21 @@ $ sudo crontab -l
 
 # Voir les logs.
 $ grep CRON /var/log/syslog | grep WorkInFrance
+```
+
+### Partage du fichier JSON des statistiques
+
+Une page publique de statistiques est disponible sur le site web ([`work-in-france`](https://github.com/SocialGouv/work-in-france)) :
+
+- cette page charge ses données depuis un fichier JSON
+- ce fichier JSON est un fichier statique servi par le back-office public ([`work-in-france-bo-public`](https://github.com/SocialGouv/work-in-france-bo-public))
+- c'est le back-office privé (ce dépôt de code) qui génère ce fichier JSON via la commande django-admin `export_stats_data`
+- une tâche CRON déclenche la génération de ce fichier JSON et en fait une copie dans un dossier monté en tant que volume dans l'instance Docker du back-office public
+
+Paramétrage du CRON pour mettre à jour et fournir `stats.json` au back-office public :
+
+```shell
+# https://crontab.guru/#0_9_*_*_*
+# Every day at 09:00.
+0 9 * * * /usr/bin/docker exec -t wif_django python manage.py export_stats_data && cp /home/mitech/work-in-france-bo/workinfrance/media/stats.json /home/mitech/work-in-france-bo-public/stats.json && chown mitech:mitech /home/mitech/work-in-france-bo-public/stats.json && chmod 664 /home/mitech/work-in-france-bo-public/stats.json
 ```
