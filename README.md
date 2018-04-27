@@ -1,8 +1,8 @@
 # Work in France - Back office
 
-> Back office de la plateforme de demande d'autorisations provisoires de travail.
+> Back office privé de la plateforme de demande d'autorisations provisoires de travail.
 
-Ce dépôt de code contient le back office de Work in France.
+Ce dépôt de code contient le back office privé de Work in France. Les données qu'il contient ne sont jamais exposées directement.
 
 ## Installation de l'environnement de développement
 
@@ -75,7 +75,7 @@ $ psql -U postgres --host=0.0.0.0 --port=5433
 
 ## Export et partage de fichiers JSON entre les back-offices
 
-Les deux back-offices sont lancés avec `docker` et `docker-compose` et **des volumes** sont utilisés pour pouvoir mettre à jour des fichiers JSON :
+Les deux back-offices (celui-ci et [`work-in-france-bo-public`](https://github.com/SocialGouv/work-in-france-bo-public)) sont lancés en production avec `docker` et `docker-compose`. Des volumes sont utilisés pour pouvoir mettre à jour et partager des fichiers JSON :
 
 ```shell
 # Lancement du back-office privé.
