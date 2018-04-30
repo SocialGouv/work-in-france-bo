@@ -17,7 +17,7 @@ class Dossier(models.Model):
     """
     Store "dossiers" fetched from demarches-simplifiees.fr.
 
-    Look at `raw_json_fixture` to see the structure of the data stored in the `raw_json` field.
+    Look at `raw_dossier_fixture` to see the structure of the data stored in the `raw_json` field.
     Look at `test_reformat_json_champs` to see the structure of the data stored in the `champs_json` field.
     """
 

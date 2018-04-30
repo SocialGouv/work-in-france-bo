@@ -1,12 +1,17 @@
 """
-The data structure returned by the demarches-simplifiees.fr API endpoint:
-https://www.demarches-simplifiees.fr/api/v1/procedures/3272/dossiers/44950
+The data structure returned by the demarches-simplifiees.fr API endpoint
+that return the details of a single dossier.
+
+GET /api/v1/procedures/:procedure_id/dossiers/:id
+https://www.demarches-simplifiees.fr/docs/1.0/dossiers/show.fr.html
+
+Personal data has been anonymized.
 """
 
 # Yes, lines are long.
 # pylint:disable=line-too-long
 
-RAW_JSON_ANONYMIZED = {
+RAW_DOSSIER = {
     'dossier': {
         'id': 44950,
         'cerfa': [],

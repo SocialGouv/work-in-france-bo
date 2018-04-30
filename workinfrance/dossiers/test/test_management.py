@@ -6,8 +6,8 @@ from django.core.management import call_command
 from django.test import TestCase
 
 from workinfrance.dossiers.models import Dossier
-from workinfrance.dossiers.test.raw_dossiers_json_fixture import RAW_DOSSIERS_JSON
-from workinfrance.dossiers.test.raw_json_fixture import RAW_JSON_ANONYMIZED
+from workinfrance.dossiers.test.raw_dossiers_fixture import RAW_DOSSIERS
+from workinfrance.dossiers.test.raw_dossier_fixture import RAW_DOSSIER
 
 
 def mocked_requests_get(*args, **kwargs):
@@ -27,10 +27,10 @@ def mocked_requests_get(*args, **kwargs):
     endpoint = args[0]
 
     if endpoint == 'https://www.demarches-simplifiees.fr/api/v1/procedures/3272/dossiers':
-        return MockResponse(RAW_DOSSIERS_JSON, 200)
+        return MockResponse(RAW_DOSSIERS, 200)
 
     if endpoint == 'https://www.demarches-simplifiees.fr/api/v1/procedures/3272/dossiers/44950':
-        return MockResponse(RAW_JSON_ANONYMIZED, 200)
+        return MockResponse(RAW_DOSSIER, 200)
 
     return MockResponse(None, 404)
 
