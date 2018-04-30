@@ -43,10 +43,9 @@ class StatsQueries(models.QuerySet):
                 …
             }
         """
-        if not from_datetime:
-            from_datetime = timezone.now() - datetime.timedelta(days=31)
-        if not to_datetime:
+        if not all([from_datetime, to_datetime]):
             to_datetime = timezone.now()
+            from_datetime = to_datetime - datetime.timedelta(days=31)
         q = dict(
             self
             .filter(created_at__range=(from_datetime, to_datetime))
@@ -73,10 +72,9 @@ class StatsQueries(models.QuerySet):
                 …
             }
         """
-        if not from_datetime:
-            from_datetime = timezone.now() - datetime.timedelta(days=365)
-        if not to_datetime:
+        if not all([from_datetime, to_datetime]):
             to_datetime = timezone.now()
+            from_datetime = to_datetime - datetime.timedelta(days=365)
         return dict(
             self
             .filter(created_at__range=(from_datetime, to_datetime))
@@ -137,10 +135,9 @@ class StatsQueries(models.QuerySet):
                 …
             }
         """
-        if not from_datetime:
-            from_datetime = timezone.now() - datetime.timedelta(days=365)
-        if not to_datetime:
+        if not all([from_datetime, to_datetime]):
             to_datetime = timezone.now()
+            from_datetime = to_datetime - datetime.timedelta(days=365)
         q = (
             self
             .filter(created_at__range=(from_datetime, to_datetime))

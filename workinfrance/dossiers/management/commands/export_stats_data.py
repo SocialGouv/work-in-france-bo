@@ -21,8 +21,6 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
 
-        file_path = os.path.join(settings.MEDIA_ROOT, 'stats.json')
-
         num_dossiers_day = Dossier.stats_objects.get_num_by_day()
         data_num_dossiers_day = {
             'labels': [d.strftime("%d/%m/%y") for d in num_dossiers_day.keys()],
@@ -101,6 +99,7 @@ class Command(BaseCommand):
             'data_time_to_process_by_month': data_time_to_process_by_month,
         }
 
+        file_path = os.path.join(settings.MEDIA_ROOT, 'stats.json')
         with open(file_path, 'w') as outfile:
             json.dump(data, outfile, cls=DjangoJSONEncoder)
 

@@ -50,6 +50,9 @@ $ docker exec -t wif_django python manage.py sync_dossiers
 # Exporter le fichier JSON du *validity check*
 $ docker exec -t wif_django python manage.py export_validity_check_data
 
+# Exporter le fichier JSON des statistiques
+$ docker exec -t wif_django python manage.py export_stats_data
+
 # Lancement des tests unitaires
 $ docker exec -t wif_django python manage.py test
 ```

@@ -1,3 +1,8 @@
+"""
+The data structure returned by the demarches-simplifiees.fr API endpoint:
+https://www.demarches-simplifiees.fr/api/v1/procedures/3272/dossiers/44950
+"""
+
 # Yes, lines are long.
 # pylint:disable=line-too-long
 
