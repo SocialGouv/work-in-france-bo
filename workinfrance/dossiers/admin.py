@@ -29,8 +29,6 @@ class DossierAdmin(admin.ModelAdmin):
         JSONField: {'widget': PrettyJSONWidget}
     }
 
-    # admin_departement_titre_de_sejour.short_description = _("What")
-
     def created(self, obj):
         return obj.created_at.strftime("%d/%m/%Y %H:%M")
     created.short_description = _("Créé le")
