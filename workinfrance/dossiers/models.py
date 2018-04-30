@@ -43,23 +43,6 @@ class Dossier(models.Model):
     # https://github.com/betagouv/tps/blob/c7f5ca/app/models/dossier.rb#L12
     STATUSES_COMPLETED = [STATUS_CLOSED, STATUS_REFUSED, STATUS_WITHOUT_CONTINUATION]
 
-    ds_id = models.IntegerField(_("ID DS"), unique=True, db_index=True,
-        help_text=_("ID sur demarches-simplifiees.fr"))
-    status = models.CharField(_("Statut"), max_length=50, choices=STATUS_CHOICES, db_index=True)
-    created_at = models.DateTimeField(_("Date de création"), db_index=True)
-    updated_at = models.DateTimeField(_("Date de modification"), blank=True, null=True)
-    department = models.CharField(_("Département"), max_length=255, db_index=True,
-        help_text=_("Département qui figure sur le titre de séjour"))
-    raw_json = JSONField(_("Résultat JSON brut"))
-    # The raw_json field structure make it difficult to query the values of its `champs`
-    # and `champs_private` subfields. The following field is used to facilitate queries.
-    champs_json = JSONField(_("Champs et champs privés"),
-        help_text=_("Champs et champs privés extraits de raw_json et reformatés"))
-
-    objects = models.Manager()
-    completed_objects = models_managers.CompletedManager()
-    stats_objects = models_queries.StatsQueries.as_manager()
-
     RAW_JSON_CHAMPS_MAPPING = {
         # Items in champs_private
         'date_de_debut_apt': 'Date de début APT',
@@ -100,6 +83,23 @@ class Dossier(models.Model):
         'document_autorisant_le_sejour_en_france': 'Document autorisant le séjour en France',
     }
 
+    ds_id = models.IntegerField(_("ID DS"), unique=True, db_index=True,
+        help_text=_("ID sur demarches-simplifiees.fr"))
+    status = models.CharField(_("Statut"), max_length=50, choices=STATUS_CHOICES, db_index=True)
+    created_at = models.DateTimeField(_("Date de création"), db_index=True)
+    updated_at = models.DateTimeField(_("Date de modification"), blank=True, null=True)
+    department = models.CharField(_("Département"), max_length=255, db_index=True,
+        help_text=_("Département qui figure sur le titre de séjour"))
+    raw_json = JSONField(_("Résultat JSON brut"))
+    # The raw_json field structure make it difficult to query the values of its `champs`
+    # and `champs_private` subfields. The following field is used to facilitate queries.
+    champs_json = JSONField(_("Champs et champs privés"),
+        help_text=_("Champs et champs privés extraits de raw_json et reformatés"))
+
+    objects = models.Manager()
+    completed_objects = models_managers.CompletedManager()
+    stats_objects = models_queries.StatsQueries.as_manager()
+
     def __init__(self, *args, **kwargs):
         """
         Make some JSONField subfields of raw_json accessible as direct attributes of the instance, e.g.:
@@ -121,6 +121,11 @@ class Dossier(models.Model):
         for property_name in RAW_JSON_MAPPING:
             setattr(self, property_name, self.raw_json['dossier'][property_name])
 
+        # No pk means that the object is being created: champs_json has not been populated
+        # because save() has not yet been called.
+        if not self.pk:
+            self.champs_json = self.reformat_json_champs(self.raw_json)
+
         for key in self.RAW_JSON_CHAMPS_MAPPING:
             try:
                 # Try to convert JSON dates to Python dates.
@@ -132,6 +137,10 @@ class Dossier(models.Model):
 
     def __str__(self):
         return str(self.ds_id)
+
+    def save(self, force_insert=False, force_update=False, using=None, update_fields=None):
+        self.champs_json = self.reformat_json_champs(self.raw_json)
+        super().save(force_insert=force_insert, force_update=force_update, using=using, update_fields=update_fields)
 
     @staticmethod
     def reformat_json_champs(raw_json):

@@ -11,7 +11,7 @@ from workinfrance.dossiers.models import Dossier
 
 class Command(BaseCommand):
 
-    help = 'Fetch dossiers from the demarches-simplifiees.fr API and store them in our DB.'
+    help = 'Fetch dossiers from the demarches-simplifiees.fr API and store them in the local DB.'
 
     API_BASE_URL = f'{settings.DS_API_BASE_URL}/procedures/{settings.DS_PROCEDURE_ID_APT}'
     API_PAYLOAD = {'token': settings.DS_API_TOKEN}
@@ -26,7 +26,8 @@ class Command(BaseCommand):
     def handle(self, *args, **options):
 
         dossiers_ids = self.fetch_dossiers_ids()
-        self.fetch_and_store_dossiers(dossiers_ids)
+        for resp_json in self.fetch_dossiers(dossiers_ids):
+            self.store_dossier(resp_json)
 
         self.stdout.write(f"""--------------------------------------------------------------------------------
 {self.STATS['count_dossiers']} - number of dossiers checked
@@ -36,7 +37,7 @@ Done.""")
 
     def fetch_dossiers_ids(self):
         """
-        Fetch all dossiers IDs.
+        Fetch all dossiers IDs from the demarches-simplifiees.fr API.
         """
         ALL_DOSSIERS_URL = f'{self.API_BASE_URL}/dossiers'
         page_current = 1
@@ -65,9 +66,9 @@ Done.""")
 
         return dossiers_ids
 
-    def fetch_and_store_dossiers(self, dossiers_ids):
+    def fetch_dossiers(self, dossiers_ids):
         """
-        Fetch and store dossiers details.
+        Fetch dossiers details from the demarches-simplifiees.fr API.
         """
         for dossier_id in dossiers_ids:
 
@@ -84,23 +85,28 @@ Done.""")
             resp_json = r.json()
             self.STATS['count_http_queries'] += 1
 
-            data = self.format_for_model(resp_json)
-            dossier = Dossier.objects.filter(ds_id=data['ds_id']).first()
+            yield resp_json
 
-            if not dossier or data['updated_at'] > dossier.updated_at:
-                self.stdout.write(f'Storing dossier {dossier_id}')
-                Dossier.objects.update_or_create(
-                    ds_id=data['ds_id'],
-                    defaults={
-                        'status': data['status'],
-                        'created_at': data['created_at'],
-                        'updated_at': data['updated_at'],
-                        'department': data['department'],
-                        'raw_json': data['raw_json'],
-                        'champs_json': data['champs_json'],
-                    },
-                )
-                self.STATS['count_update_or_create'] += 1
+    def store_dossier(self, resp_json):
+        """
+        Store a dossier in the local DB.
+        """
+        data = self.format_for_model(resp_json)
+        dossier = Dossier.objects.filter(ds_id=data['ds_id']).first()
+
+        if not dossier or data['updated_at'] > dossier.updated_at:
+            self.stdout.write(f"Storing dossier {data['ds_id']}")
+            Dossier.objects.update_or_create(
+                ds_id=data['ds_id'],
+                defaults={
+                    'status': data['status'],
+                    'created_at': data['created_at'],
+                    'updated_at': data['updated_at'],
+                    'department': data['department'],
+                    'raw_json': data['raw_json'],
+                },
+            )
+            self.STATS['count_update_or_create'] += 1
 
     def format_for_model(self, resp_json):
         """
@@ -124,5 +130,4 @@ Done.""")
             'updated_at': updated_at,
             'department': department,
             'raw_json': resp_json,
-            'champs_json': Dossier.reformat_json_champs(resp_json),
         }

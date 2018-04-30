@@ -21,7 +21,6 @@ class DossierTest(TestCase):
             updated_at=utils.json_datetime_to_python(RAW_JSON_ANONYMIZED['dossier']['updated_at']),
             department='75 - Paris',
             raw_json=RAW_JSON_ANONYMIZED,
-            champs_json=Dossier.reformat_json_champs(RAW_JSON_ANONYMIZED),
         )
 
     def test_attributes(self):
