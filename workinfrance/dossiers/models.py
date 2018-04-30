@@ -88,7 +88,7 @@ class Dossier(models.Model):
     status = models.CharField(_("Statut"), max_length=50, choices=STATUS_CHOICES, db_index=True)
     created_at = models.DateTimeField(_("Date de création"), db_index=True)
     updated_at = models.DateTimeField(_("Date de modification"), blank=True, null=True)
-    department = models.CharField(_("Département"), max_length=255, db_index=True,
+    department = models.CharField(_("Département titre de séjour"), max_length=255, db_index=True,
         help_text=_("Département qui figure sur le titre de séjour"))
     raw_json = JSONField(_("Résultat JSON brut"))
     # The raw_json field structure make it difficult to query the values of its `champs`
@@ -162,22 +162,5 @@ class Dossier(models.Model):
         """Return True if an 'autorisation' has expired, False otherwise."""
         return self.date_de_fin_apt and self.date_de_fin_apt < datetime.date.today()
 
-    # Explicit properties are required for values to be displayed in the Django admin.
-
-    @property
-    def admin_departement_titre_de_sejour(self):
-        return self.departement_titre_de_sejour
-
-    @property
-    def admin_date_de_debut_apt(self):
-        return self.date_de_debut_apt
-
-    @property
-    def admin_date_de_fin_apt(self):
-        return self.date_de_fin_apt
-
-    @property
-    def admin_accompagnateurs(self):
-        return self.accompagnateurs
 
 # pylint:enable=unsubscriptable-object
