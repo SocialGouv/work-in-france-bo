@@ -4,17 +4,32 @@ from django.contrib.postgres.fields.jsonb import KeyTextTransform
 from django.db import models
 from django.db.models import Count, Sum
 from django.db.models.expressions import F, ExpressionWrapper
+from django.db.models.expressions import RawSQL, OrderBy
 from django.db.models.functions import TruncDate, TruncMonth
 from django.utils import timezone
 
 from workinfrance.dossiers import utils
 
 
+class PrefectureQueries(models.QuerySet):
+
+    def watch_before_renew(self, descending=True):
+        """
+        Returns a queryset of Dossiers to watch before a renewal in Prefecture.
+        """
+        return (
+            self
+            .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.date.today().strftime('%Y-%m-%d'))
+            .annotate(expiration_admin_order=KeyTextTransform('date_dexpiration_titre_sejour', 'champs_json'))
+            .order_by(OrderBy(RawSQL('champs_json->>%s', ('date_dexpiration_titre_sejour',)), descending=descending))
+        )
+
+
 class StatsQueries(models.QuerySet):
 
     def get_num_by_country(self):
         """
-        Number of dossiers by country.
+        Number of Dossiers by country.
 
         Returns a dict:
             {
@@ -34,7 +49,7 @@ class StatsQueries(models.QuerySet):
 
     def get_num_by_day(self, from_datetime=None, to_datetime=None):
         """
-        Number of dossiers by day (during the last 31 days by default).
+        Number of Dossiers by day (during the last 31 days by default).
 
         Returns a dict:
             {
@@ -56,14 +71,14 @@ class StatsQueries(models.QuerySet):
             .values_list('day', 'total')
         )
         return {
-            # Include days with 0 dossiers (because they are not included in the queryset result).
+            # Include days with 0 Dossiers (because they are not included in the queryset result).
             date: q.get(date, 0)
             for date in utils.daterange(from_datetime, to_datetime)
         }
 
     def get_num_by_month(self, from_datetime=None, to_datetime=None):
         """
-        Number of dossiers by month (during the last 365 days by default).
+        Number of Dossiers by month (during the last 365 days by default).
 
         Returns a dict:
             {
@@ -87,7 +102,7 @@ class StatsQueries(models.QuerySet):
 
     def get_num_by_status(self):
         """
-        Number of dossiers in each status.
+        Number of Dossiers in each status.
 
         Returns a dict:
             {
@@ -108,7 +123,7 @@ class StatsQueries(models.QuerySet):
 
     def get_time_to_process(self):
         """
-        Global average time to process a dossier.
+        Global average time to process a Dossier.
 
         Returns a datetime.timedelta object.
         """
@@ -126,7 +141,7 @@ class StatsQueries(models.QuerySet):
 
     def get_time_to_process_by_month(self, from_datetime=None, to_datetime=None):
         """
-        Average time to process a dossier by month (during the last 365 days by default).
+        Average time to process a Dossier by month (during the last 365 days by default).
 
         Returns a dict:
             {

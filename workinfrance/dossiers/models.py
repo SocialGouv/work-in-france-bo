@@ -99,6 +99,7 @@ class Dossier(models.Model):
     objects = models.Manager()
     completed_objects = models_managers.CompletedManager()
     stats_objects = models_queries.StatsQueries.as_manager()
+    prefecture_objects = models_queries.PrefectureQueries.as_manager()
 
     def __init__(self, *args, **kwargs):
         """
@@ -161,6 +162,18 @@ class Dossier(models.Model):
     def has_expired(self):
         """Return True if an 'autorisation' has expired, False otherwise."""
         return self.date_de_fin_apt and self.date_de_fin_apt < datetime.date.today()
+
+
+class DossierPrefecture(Dossier):
+    """
+    Use a proxy model to customize the Django admin.
+    https://lincolnloop.com/blog/using-proxy-models-customize-django-admin/
+    """
+
+    class Meta:
+        proxy = True
+        verbose_name = _("Dossier (suivi Préfecture)")
+        verbose_name_plural = _("Dossiers (suivi Préfecture)")
 
 
 # pylint:enable=unsubscriptable-object

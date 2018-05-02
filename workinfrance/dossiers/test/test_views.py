@@ -21,11 +21,6 @@ class ViewsTest(TestCase):
             raw_json=RAW_DOSSIER,
         )
 
-    def test_dossiers_to_watch_before_prefecture(self):
-        dossiers_to_watch = views.dossiers_to_watch_before_prefecture()
-        expected_result = ['10/05/2018 - 44950 - FRANCE - John - Doe - Accepté']
-        self.assertEqual(dossiers_to_watch, expected_result)
-
     def test_export_data_for_validity_check(self):
         export_data = views.export_data_for_validity_check()
         expected_result = [
