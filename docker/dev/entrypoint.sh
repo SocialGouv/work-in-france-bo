@@ -8,6 +8,6 @@ done
 
 >&2 echo "Postgres is up - continuing"
 
-python manage.py runserver 0.0.0.0:8000
+pipenv run python manage.py runserver 0.0.0.0:8000
 
 exec "$@"

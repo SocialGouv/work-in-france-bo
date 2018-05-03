@@ -41,6 +41,19 @@ $ docker exec -t wif_django python manage.py migrate
 $ docker exec -ti wif_django python manage.py createsuperuser
 ```
 
+## Workflow de mise à jour des dépendances du projet :
+
+```shell
+# Voir la liste de ce qui a changé upstream
+$ docker exec -t wif_django pipenv update --dev --outdated
+
+# Mise à jour de toutes les dépendances
+$ docker exec -t wif_django pipenv update
+
+# Mise à jour par paquet
+$ docker exec -t wif_django pipenv update <pkg>
+```
+
 ## Exécution des commandes django-admin
 
 ```shell
@@ -63,7 +76,7 @@ $ docker exec -t wif_django python manage.py test
 $ make pylint
 ```
 
-## Mémo (en environnement de développement)
+## Mémo (environnement de développement)
 
 ```shell
 # Ouvrir un shell dans l'instance Docker.
@@ -78,7 +91,7 @@ $ psql -U postgres --host=0.0.0.0 --port=5433
 
 ## Export et partage de fichiers JSON entre les back-offices
 
-Les deux back-offices (celui-ci et [`work-in-france-bo-public`](https://github.com/SocialGouv/work-in-france-bo-public)) sont lancés en production avec `docker` et `docker-compose`. Des volumes sont utilisés pour pouvoir mettre à jour et partager des fichiers JSON :
+Les deux back-offices (celui-ci et [`work-in-france-bo-public`](https://github.com/SocialGouv/work-in-france-bo-public)) sont lancés en production avec `docker-compose` et `docker`. Des volumes sont utilisés pour pouvoir mettre à jour et partager des fichiers JSON :
 
 ```shell
 # Lancement du back-office privé.
