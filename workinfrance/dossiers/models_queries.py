@@ -17,9 +17,10 @@ class PrefectureQueries(models.QuerySet):
         """
         Returns a queryset of Dossiers to watch before a renewal in Prefecture.
         """
+        from_datetime = timezone.now() - datetime.timedelta(days=62)
         return (
             self
-            .filter(champs_json__date_dexpiration_titre_sejour__gt=datetime.date.today().strftime('%Y-%m-%d'))
+            .filter(champs_json__date_dexpiration_titre_sejour__gt=from_datetime.strftime('%Y-%m-%d'))
             .annotate(expiration_admin_order=KeyTextTransform('date_dexpiration_titre_sejour', 'champs_json'))
             .order_by(OrderBy(RawSQL('champs_json->>%s', ('date_dexpiration_titre_sejour',)), descending=descending))
         )
