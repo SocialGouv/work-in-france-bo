@@ -37,8 +37,8 @@ $ docker-compose up
 ### Initialisation du projet
 
 ```shell
-$ docker exec -t wif_django python manage.py migrate
-$ docker exec -ti wif_django python manage.py createsuperuser
+$ docker exec -t wif_django pipenv run python manage.py migrate
+$ docker exec -ti wif_django pipenv run python manage.py createsuperuser
 ```
 
 ## Workflow de mise à jour des dépendances du projet :
@@ -58,16 +58,16 @@ $ docker exec -t wif_django pipenv update <pkg>
 
 ```shell
 # Récupération des dossiers depuis demarches-simplifiees.fr
-$ docker exec -t wif_django python manage.py sync_dossiers
+$ docker exec -t wif_django pipenv run python manage.py sync_dossiers
 
 # Exporter le fichier JSON du *validity check*
-$ docker exec -t wif_django python manage.py export_validity_check_data
+$ docker exec -t wif_django pipenv run python manage.py export_validity_check_data
 
 # Exporter le fichier JSON des statistiques
-$ docker exec -t wif_django python manage.py export_stats_data
+$ docker exec -t wif_django pipenv run python manage.py export_stats_data
 
 # Lancement des tests unitaires
-$ docker exec -t wif_django python manage.py test
+$ docker exec -t wif_django pipenv run python manage.py test
 ```
 
 ## Vérification de la syntaxe du code
@@ -83,7 +83,7 @@ $ make pylint
 $ docker exec -ti wif_django /bin/sh
 
 # Ouvrir un shell Django dans l'instance Docker.
-$ docker exec -ti wif_django python manage.py shell
+$ docker exec -ti wif_django pipenv run python manage.py shell
 
 # Se connecter au PostgreSQL de l'instance Docker.
 $ psql -U postgres --host=0.0.0.0 --port=5433
