@@ -10,9 +10,9 @@ Ce dépôt de code contient le back office privé de Work in France. Les donn�
 
     PYTHONPATH=.
 
-    DJANGO_SETTINGS_MODULE='workinfrance.settings'
+    DJANGO_SETTINGS_MODULE=workinfrance.settings
 
-    WIF_SECRET_KEY='<SECRET>'
+    WIF_SECRET_KEY=<SECRET>
 
     WIF_DEBUG=True
 
@@ -25,8 +25,8 @@ Ce dépôt de code contient le back office privé de Work in France. Les donn�
     WIF_DATABASE_HOST=db
     WIF_DATABASE_PORT=5432
 
-    DEMARCHES_SIMPLIFIEES_API_TOKEN='<SECRET>'
-    DEMARCHES_SIMPLIFIEES_PROCEDURE_ID_APT='<SECRET>'
+    DEMARCHES_SIMPLIFIEES_API_TOKEN=<SECRET>
+    DEMARCHES_SIMPLIFIEES_PROCEDURE_ID_APT=<SECRET>
 
 ### Création des instances Docker
 
