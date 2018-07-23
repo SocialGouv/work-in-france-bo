@@ -1,5 +1,6 @@
 import json
 import os
+import math
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -71,19 +72,19 @@ class Command(BaseCommand):
         )
         data_time_to_process_by_month = {
             'labels': [
-                f'{dt.strftime("%m/%y")} - {str(delta).replace("day", "jour").split(".")[0]}'
+                f'{dt.strftime("%m/%Y")} - {delta.days} jour(s)'
                 for dt, delta in time_to_process_by_month.items()
             ],
             'datasets': [
                 {
-                    'name': "Temps de traitement moyen par mois (en secondes)",
-                    'values': [delta.total_seconds() for delta in time_to_process_by_month.values()],
+                    'name': "Temps de traitement moyen par mois (en jours)",
+                    'values': [delta.days for delta in time_to_process_by_month.values()],
                 },
             ],
         }
 
         time_to_process = Dossier.stats_objects.filter(status=Dossier.STATUS_CLOSED).get_time_to_process()
-        time_to_process = str(time_to_process).replace("day", "jour").split(".")[0]
+        time_to_process = math.floor(time_to_process.total_seconds() / 60 / 60 / 24)
 
         data = {
             'data': {
