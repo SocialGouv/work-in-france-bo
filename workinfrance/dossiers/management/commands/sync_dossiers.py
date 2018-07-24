@@ -47,24 +47,26 @@ Done.""")
         }
         r = requests.get(ALL_DOSSIERS_URL, params=self.API_PAYLOAD, headers=self.API_HEADERS, data=json.dumps(data))
         resp = r.json()
-        self.STATS['count_http_queries'] += 1
+        if resp:
+          self.STATS['count_http_queries'] += 1
 
-        dossiers_ids = [item['id'] for item in resp['dossiers']]
-        self.STATS['count_dossiers'] = len(dossiers_ids)
+          dossiers_ids = [item['id'] for item in resp['dossiers']]
+          self.STATS['count_dossiers'] = len(dossiers_ids)
 
-        # The list of all dossiers may have multiple pages. In this case, iterate over other pages.
-        while page_current < resp['pagination']['nombre_de_page']:
-            page_current += 1
-            data['page'] = page_current
+          # The list of all dossiers may have multiple pages. In this case, iterate over other pages.
+          while page_current < resp['pagination']['nombre_de_page']:
+              page_current += 1
+              data['page'] = page_current
 
-            r = requests.get(ALL_DOSSIERS_URL, params=self.API_PAYLOAD, headers=self.API_HEADERS, data=json.dumps(data))
-            resp_json = r.json()
-            self.STATS['count_http_queries'] += 1
+              r = requests.get(ALL_DOSSIERS_URL, params=self.API_PAYLOAD, headers=self.API_HEADERS, data=json.dumps(data))
+              resp_json = r.json()
+              self.STATS['count_http_queries'] += 1
 
-            dossiers_ids.extend([item['id'] for item in resp_json['dossiers']])
-            self.STATS['count_dossiers'] = len(dossiers_ids)
+              dossiers_ids.extend([item['id'] for item in resp_json['dossiers']])
+              self.STATS['count_dossiers'] = len(dossiers_ids)
 
-        return dossiers_ids
+          return dossiers_ids
+        return []
 
     def fetch_dossiers(self, dossiers_ids):
         """
