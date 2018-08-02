@@ -25,7 +25,7 @@ RUN apk update \
 RUN cp /usr/share/zoneinfo/Europe/Paris /etc/localtime \
    && echo "Europe/Paris" > /etc/timezone
 
-RUN pip install pipenv==11.10.1
+RUN pip install pipenv==2018.7.1
 
 COPY --chown=app:app . $APP_DIR
 
