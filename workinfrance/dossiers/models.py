@@ -162,7 +162,10 @@ class Dossier(models.Model):
 
     def has_expired(self):
         """Return True if an 'autorisation' has expired, False otherwise."""
-        return self.date_de_fin_apt and self.date_de_fin_apt < datetime.date.today()
+        try:
+          return self.date_de_fin_apt and self.date_de_fin_apt < datetime.date.today()
+        except TypeError:
+          return True
 
 
 class DossierPrefecture(Dossier):
