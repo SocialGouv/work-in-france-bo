@@ -120,7 +120,8 @@ class Dossier(models.Model):
             'pieces_justificatives'
         ]
         for property_name in RAW_JSON_MAPPING:
-            setattr(self, property_name, self.raw_json['dossier'][property_name])
+            if property_name in self.raw_json['dossier']:
+              setattr(self, property_name, self.raw_json['dossier'][property_name])
 
         # No pk means that the object is being created: champs_json has not been populated
         # because save() has not yet been called.
