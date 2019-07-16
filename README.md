@@ -1,4 +1,4 @@
-# Work in France - Back office
+# Work in France - Back office [![deprecated](http://badges.github.io/stability-badges/dist/deprecated.svg)](http://github.com/badges/stability-badges)
 
 > Back office privé de la plateforme de demande d'autorisations provisoires de travail.
 
